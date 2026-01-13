@@ -11,8 +11,24 @@
   <!-- Styles -->
   <link rel="stylesheet" href="styles.css">
 
-  <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json">
+
+  <style>
+    /* Simple page switching */
+    .page { display: none; transition: opacity 0.3s ease; }
+    .page.active { display: block; opacity: 1; }
+
+    /* Navigation buttons */
+    #navBar { margin: 10px 0; }
+    #navBar button { margin-right: 5px; padding: 5px 10px; }
+
+    /* Modal styles */
+    .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%;
+             background: rgba(0,0,0,0.6); justify-content:center; align-items:center; }
+    .modal.active { display:flex; }
+    .modal-content { background:white; padding:20px; border-radius:10px; width:90%; max-width:400px; }
+    .modal-content input, .modal-content textarea { width:100%; margin:5px 0; }
+  </style>
 </head>
 <body>
 
@@ -34,9 +50,14 @@
     </div>
   </div>
 
-  <!-- MAIN CONTENT -->
-  <main>
-    <!-- FORM -->
+  <!-- NAVIGATION -->
+  <div id="navBar">
+    <button id="page1Btn">Progress</button>
+    <button id="page2Btn">Records</button>
+  </div>
+
+  <!-- PAGE 1: Progress Form + Chart -->
+  <div id="page1" class="page active">
     <form id="progressForm">
       <input type="date" id="date" required>
       <input type="number" step="0.1" id="weight" placeholder="Weight (kg)" required>
@@ -47,22 +68,36 @@
       <button type="submit">💾 Save Progress</button>
     </form>
 
-    <!-- BMI DISPLAY -->
     <div id="bmiBox"></div>
 
-    <!-- CHART -->
     <section id="chartSection">
       <canvas id="weightChart"></canvas>
     </section>
+  </div>
 
-    <!-- RECORD LIST -->
+  <!-- PAGE 2: Records List -->
+  <div id="page2" class="page">
     <ul id="recordList"></ul>
-  </main>
+  </div>
 
-  <!-- Scripts in proper order -->
+  <!-- MODAL FOR EDITING RECORD -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <h3>Edit Record</h3>
+      <input type="date" id="editDate">
+      <input type="number" step="0.1" id="editWeight" placeholder="Weight (kg)">
+      <input type="number" step="0.1" id="editFat" placeholder="Body Fat (%)">
+      <input type="number" step="0.1" id="editWater" placeholder="Water (%)">
+      <textarea id="editNotes" placeholder="Notes..."></textarea>
+      <button id="saveEditBtn">Save</button>
+      <button id="closeModalBtn">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
-  <script src="db.js"></script>  <!-- initializes db and window.dbReady -->
-  <script src="app.js"></script> <!-- app logic that uses db -->
+  <script src="db.js"></script>
+  <script src="app.js"></script>
 
 </body>
 </html>
