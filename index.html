@@ -1,48 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fitness Progress Tracker</title>
-  <link rel="manifest" href="manifest.json">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fitness Tracker PWA</title>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Styles -->
   <link rel="stylesheet" href="styles.css">
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
 </head>
 <body>
+
+  <!-- HEADER -->
   <header>
     <h1>🏋️ Fitness Tracker</h1>
-    <p>Weekly Progress Monitor</p>
+    <button id="themeToggle">🌙</button>
     <button id="lockBtn">🔐</button>
-<button id="resetBtn">🗑️</button>
-
+    <button id="resetBtn">🗑️</button>
   </header>
 
+  <!-- PIN LOCK OVERLAY -->
+  <div id="pinOverlay">
+    <div class="pinBox">
+      <h2>🔒 Enter PIN</h2>
+      <input type="password" id="pinInput" maxlength="4" inputmode="numeric" placeholder="••••"/>
+      <button id="pinBtn">Set PIN</button>
+      <p id="pinMsg"></p>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
   <main>
+    <!-- FORM -->
     <form id="progressForm">
       <input type="date" id="date" required>
       <input type="number" step="0.1" id="weight" placeholder="Weight (kg)" required>
       <input type="number" step="0.1" id="fat" placeholder="Body Fat (%)">
       <input type="number" step="0.1" id="water" placeholder="Water (%)">
-      <textarea id="notes" placeholder="Notes (energy, hunger, sleep)"></textarea>
-      <button type="submit">Save Progress</button>
+      <input type="number" step="0.01" id="height" placeholder="Height (m)">
+      <textarea id="notes" placeholder="Notes..."></textarea>
+      <button type="submit">💾 Save Progress</button>
     </form>
 
-    <section id="records">
-      <h2>📊 Weekly Records</h2>
-      <ul id="recordList"></ul>
+    <!-- BMI DISPLAY -->
+    <div id="bmiBox"></div>
+
+    <!-- CHART -->
+    <section id="chartSection">
+      <canvas id="weightChart"></canvas>
     </section>
+
+    <!-- RECORD LIST -->
+    <ul id="recordList"></ul>
   </main>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
-  <script src="db.js"></script>
+  <!-- App JS -->
+  <script src="sql.js"></script> <!-- sqlite.js or sql.js -->
   <script src="app.js"></script>
-</body>
-  <div id="pinOverlay">
-  <div class="pinBox">
-    <h2>🔒 Enter PIN</h2>
-    <input type="password" id="pinInput" maxlength="4" inputmode="numeric" />
-    <button id="pinBtn">Unlock</button>
-    <p id="pinMsg"></p>
-  </div>
-</div>
 
+</body>
 </html>
