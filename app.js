@@ -223,4 +223,5 @@ function renderChart(labels, weights) {
 // INITIALIZE
 // ---------------------------
 checkPin();
-window.dbReady.then(() => loadRecords());
+loadRecords();
+//window.dbReady.then(() => loadRecords());
