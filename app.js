@@ -231,3 +231,72 @@ window.dbReady.then(() => {
 });
 
 //window.dbReady.then(() => loadRecords());
+
+// ---------------------------
+// PAGE NAVIGATION
+// ---------------------------
+const page1Btn = document.getElementById("page1Btn");
+const page2Btn = document.getElementById("page2Btn");
+const page1 = document.getElementById("page1");
+const page2 = document.getElementById("page2");
+
+function showPage(page) {
+  page1.classList.remove("active");
+  page2.classList.remove("active");
+  page.classList.add("active");
+}
+
+page1Btn.addEventListener("click", () => showPage(page1));
+page2Btn.addEventListener("click", () => showPage(page2));
+
+// ---------------------------
+// RECORD LIST & MODAL EDIT
+// ---------------------------
+const editModal = document.getElementById("editModal");
+const editDate = document.getElementById("editDate");
+const editWeight = document.getElementById("editWeight");
+const editFat = document.getElementById("editFat");
+const editWater = document.getElementById("editWater");
+const editNotes = document.getElementById("editNotes");
+const saveEditBtn = document.getElementById("saveEditBtn");
+const closeModalBtn = document.getElementById("closeModalBtn");
+
+let currentEditId = null;
+
+recordList.addEventListener("click", (e) => {
+  const li = e.target.closest("li");
+  if (!li) return;
+  const id = li.dataset.id;
+  currentEditId = id;
+
+  // Fetch record from DB
+  const res = db.exec(`SELECT * FROM progress WHERE id = ?`, [id]);
+  if (!res.length) return;
+
+  const row = res[0].values[0];
+  editDate.value = row[1];
+  editWeight.value = row[2];
+  editFat.value = row[3];
+  editWater.value = row[4];
+  editNotes.value = row[5];
+
+  editModal.classList.add("active");
+});
+
+closeModalBtn.addEventListener("click", () => {
+  editModal.classList.remove("active");
+});
+
+// Save edited record
+saveEditBtn.addEventListener("click", () => {
+  if (!currentEditId) return;
+
+  db.run(
+    `UPDATE progress SET date=?, weight=?, fat=?, water=?, notes=? WHERE id=?`,
+    [editDate.value, editWeight.value, editFat.value, editWater.value, editNotes.value, currentEditId]
+  );
+  saveDb();
+  editModal.classList.remove("active");
+  loadRecords();
+});
+
