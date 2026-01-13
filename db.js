@@ -4,10 +4,12 @@ const DB_NAME = "fitness.db";
 
 // A promise that resolves when DB is ready
 window.dbReady = initSqlJs({
+  // locateFile maps "sql-wasm.wasm" to the correct URL on CDN
   locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
 }).then(async SQLLib => {
   SQL = SQLLib;
 
+  // Load DB from localStorage if exists
   const savedDb = localStorage.getItem(DB_NAME);
 
   db = savedDb
@@ -26,6 +28,7 @@ window.dbReady = initSqlJs({
     )
   `);
 
+  console.log("Database initialized");
   return db; // resolve with DB instance
 });
 
@@ -34,4 +37,5 @@ function saveDb() {
   if (!db) return;
   const data = db.export();
   localStorage.setItem(DB_NAME, btoa(String.fromCharCode(...data)));
+  console.log("Database saved to localStorage");
 }
