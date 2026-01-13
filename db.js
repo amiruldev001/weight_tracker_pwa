@@ -5,7 +5,7 @@ const DB_NAME = "fitness.db";
 // A promise that resolves when DB is ready
 window.dbReady = initSqlJs({
   // locateFile maps "sql-wasm.wasm" to the correct URL on CDN
-  locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+  locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js`
 }).then(async SQLLib => {
   SQL = SQLLib;
 
