@@ -1,29 +1,43 @@
+// Register Service Worker
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js");
 }
 
-document.getElementById("progressForm").addEventListener("submit", e => {
+const form = document.getElementById("progressForm");
+const recordList = document.getElementById("recordList");
+
+form.addEventListener("submit", function (e) {
   e.preventDefault();
 
-  const date = date.value;
-  const weight = weight.value;
-  const fat = fat.value;
-  const water = water.value;
-  const notes = notes.value;
+  // Ensure DB is ready
+  if (!window.db) {
+    alert("Database still loading, please try again.");
+    return;
+  }
 
+  // Get input values SAFELY
+  const dateVal = document.getElementById("date").value;
+  const weightVal = document.getElementById("weight").value;
+  const fatVal = document.getElementById("fat").value || null;
+  const waterVal = document.getElementById("water").value || null;
+  const notesVal = document.getElementById("notes").value || "";
+
+  // Insert into SQLite
   db.run(
-    "INSERT INTO progress (date, weight, fat, water, notes) VALUES (?, ?, ?, ?, ?)",
-    [date, weight, fat, water, notes]
+    `INSERT INTO progress (date, weight, fat, water, notes)
+     VALUES (?, ?, ?, ?, ?)`,
+    [dateVal, weightVal, fatVal, waterVal, notesVal]
   );
 
   saveDb();
   loadRecords();
-  e.target.reset();
+  form.reset();
 });
 
 function loadRecords() {
-  const list = document.getElementById("recordList");
-  list.innerHTML = "";
+  recordList.innerHTML = "";
+
+  if (!window.db) return;
 
   const res = db.exec("SELECT * FROM progress ORDER BY date DESC");
   if (!res.length) return;
@@ -33,9 +47,9 @@ function loadRecords() {
     li.innerHTML = `
       <strong>${row[1]}</strong><br>
       Weight: ${row[2]} kg<br>
-      Fat: ${row[3] || "-"}% | Water: ${row[4] || "-"}%<br>
-      <em>${row[5] || ""}</em>
+      Fat: ${row[3] ?? "-"}% | Water: ${row[4] ?? "-"}%<br>
+      <em>${row[5]}</em>
     `;
-    list.appendChild(li);
+    recordList.appendChild(li);
   });
 }
