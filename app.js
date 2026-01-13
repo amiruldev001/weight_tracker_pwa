@@ -1,5 +1,5 @@
 // ===========================
-// APP.JS - FULL INTEGRATED
+// APP.JS - FULL INTEGRATED WITH DB READY
 // ===========================
 
 // Register Service Worker
@@ -65,7 +65,6 @@ themeToggle.addEventListener("click", () => {
 function checkPin() {
   pinOverlay.style.display = "flex";
 
-  // Update overlay text
   const savedPin = localStorage.getItem("pin");
   if (!savedPin) {
     pinMsg.textContent = "Set a new 4-digit PIN";
@@ -77,7 +76,6 @@ function checkPin() {
 
   pinBtn.onclick = () => {
     const entered = pinInput.value;
-
     if (entered.length !== 4) {
       pinMsg.textContent = "PIN must be 4 digits";
       return;
@@ -85,7 +83,6 @@ function checkPin() {
 
     let savedPin = localStorage.getItem("pin"); // read fresh
 
-    // No PIN yet → set
     if (!savedPin) {
       localStorage.setItem("pin", hashPin(entered));
       pinOverlay.style.display = "none";
@@ -93,7 +90,6 @@ function checkPin() {
       return;
     }
 
-    // Check existing PIN
     if (hashPin(entered) === savedPin) {
       pinOverlay.style.display = "none";
       pinInput.value = "";
@@ -103,7 +99,6 @@ function checkPin() {
   };
 }
 
-// Manual lock button
 lockBtn.addEventListener("click", () => {
   pinInput.value = "";
   pinMsg.textContent = "";
@@ -113,7 +108,8 @@ lockBtn.addEventListener("click", () => {
 // ---------------------------
 // RESET / CLEAR DATA
 // ---------------------------
-resetBtn.addEventListener("click", () => {
+resetBtn.addEventListener("click", async () => {
+  await window.dbReady; // wait for DB
   if (!confirm("This will delete ALL progress data. Continue?")) return;
 
   db.run("DELETE FROM progress");
@@ -121,7 +117,6 @@ resetBtn.addEventListener("click", () => {
 
   recordList.innerHTML = "";
   bmiBox.innerHTML = "";
-
   if (weightChart) weightChart.destroy();
 
   alert("All data cleared.");
@@ -130,13 +125,9 @@ resetBtn.addEventListener("click", () => {
 // ---------------------------
 // FORM SUBMIT
 // ---------------------------
-form.addEventListener("submit", function (e) {
+form.addEventListener("submit", async function (e) {
   e.preventDefault();
-
-  if (!window.db) {
-    alert("Database still loading, try again.");
-    return;
-  }
+  await window.dbReady; // wait for DB
 
   const dateVal = document.getElementById("date").value;
   const weightVal = document.getElementById("weight").value;
@@ -161,10 +152,9 @@ form.addEventListener("submit", function (e) {
 // ---------------------------
 // LOAD RECORDS + BMI + TREND
 // ---------------------------
-function loadRecords() {
+async function loadRecords() {
+  await window.dbReady;
   recordList.innerHTML = "";
-
-  if (!window.db) return;
 
   const res = db.exec("SELECT * FROM progress ORDER BY date ASC");
   if (!res.length) return;
@@ -179,7 +169,6 @@ function loadRecords() {
 
   renderChart(labels, weights);
 
-  // BMI + trend
   const latest = res[0].values.at(-1);
   const previous = res[0].values.at(-2);
   const height = localStorage.getItem("height");
@@ -187,11 +176,10 @@ function loadRecords() {
   if (height && latest) {
     const bmi = calculateBMI(latest[2], height);
     const arrow = getTrendArrow(latest[2], previous?.[2]);
-
     bmiBox.innerHTML = `<strong>BMI:</strong> ${bmi} ${arrow}`;
   }
 
-  // Records (latest first)
+  // Display records latest first
   res[0].values.slice().reverse().forEach(row => {
     const li = document.createElement("li");
     li.innerHTML = `
@@ -227,15 +215,12 @@ function renderChart(labels, weights) {
         }
       ]
     },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: false } }
-    }
+    options: { responsive: true, plugins: { legend: { display: false } } }
   });
 }
 
 // ---------------------------
 // INITIALIZE
 // ---------------------------
-checkPin(); // show PIN overlay on load
-loadRecords(); // load any existing records
+checkPin();
+window.dbReady.then(() => loadRecords());
