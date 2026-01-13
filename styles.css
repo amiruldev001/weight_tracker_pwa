@@ -1,61 +1,124 @@
-body {
-  font-family: system-ui, sans-serif;
-  background: #f4f7fb;
+/* ================================
+   GLOBAL STYLES
+================================ */
+* {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
+  font-family: "Segoe UI", sans-serif;
+}
+
+body {
+  background: #f1f5f9;
+  color: #0f172a;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 header {
-  background: #1f3c88;
-  color: white;
-  text-align: center;
-  padding: 1.2rem;
+  background: #1e293b;
+  color: #fff;
+  padding: 1rem 1.5rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
+header h1 {
+  font-size: 1.2rem;
+}
+
+/* HEADER BUTTONS */
+header button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  margin-left: 0.5rem;
+  cursor: pointer;
+}
+
+/* MAIN LAYOUT */
 main {
-  padding: 1rem;
-  max-width: 500px;
-  margin: auto;
+  padding: 1rem 1.5rem;
+  flex: 1;
 }
 
 form {
-  background: white;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin-bottom: 1rem;
+  background: #fff;
   padding: 1rem;
   border-radius: 12px;
-  box-shadow: 0 5px 15px rgba(0,0,0,.1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-input, textarea, button {
-  width: 100%;
-  margin-bottom: 0.7rem;
-  padding: 0.6rem;
+form input,
+form textarea {
+  padding: 0.7rem;
   border-radius: 8px;
-  border: 1px solid #ddd;
+  border: 1px solid #cbd5e1;
+  font-size: 1rem;
 }
 
-button {
-  background: #1f3c88;
+form textarea {
+  resize: vertical;
+}
+
+form button {
+  background: #3b82f6;
   color: white;
-  font-weight: bold;
+  padding: 0.7rem;
+  border-radius: 8px;
   border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.3s;
 }
 
-#records {
-  margin-top: 1.5rem;
+form button:hover {
+  background: #2563eb;
 }
 
-li {
-  background: white;
-  padding: 0.8rem;
-  margin-bottom: 0.6rem;
-  border-radius: 10px;
-  box-shadow: 0 3px 8px rgba(0,0,0,.08);
+/* BMI BOX */
+#bmiBox {
+  margin: 1rem 0;
+  font-size: 1.1rem;
+  font-weight: bold;
 }
 
+/* CHART */
+#chartSection {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 1rem;
+}
+
+/* RECORD LIST */
+#recordList {
+  list-style: none;
+}
+
+#recordList li {
+  background: #fff;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  margin-bottom: 0.7rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  font-size: 0.95rem;
+}
+
+/* PIN OVERLAY */
 #pinOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.85);
+  background: rgba(0,0,0,0.85);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -64,7 +127,7 @@ li {
 
 .pinBox {
   background: #020617;
-  padding: 1.5rem;
+  padding: 2rem;
   border-radius: 16px;
   width: 260px;
   text-align: center;
@@ -73,30 +136,47 @@ li {
 
 .pinBox input {
   width: 100%;
-  padding: .7rem;
+  padding: 0.7rem;
   font-size: 1.2rem;
   text-align: center;
-  letter-spacing: .3rem;
-  margin-bottom: .8rem;
+  letter-spacing: 0.3rem;
+  margin-bottom: 0.8rem;
   border-radius: 8px;
   border: none;
 }
 
 #pinMsg {
   color: #f87171;
-  font-size: .9rem;
+  font-size: 0.9rem;
 }
 
-/* Header buttons */
-#lockBtn, #resetBtn {
-  position: absolute;
-  top: 12px;
-  background: none;
-  border: none;
-  color: white;
-  font-size: 1.2rem;
+/* ================================
+   DARK MODE
+================================ */
+body.dark {
+  background: #0f172a;
+  color: #e5e7eb;
 }
 
-#lockBtn { right: 50px; }
-#resetBtn { right: 15px; }
+body.dark header {
+  background: #020617;
+}
+
+body.dark form,
+body.dark li,
+body.dark #chartSection {
+  background: #020617;
+  color: #e5e7eb;
+}
+
+body.dark input,
+body.dark textarea {
+  background: #020617;
+  color: #e5e7eb;
+  border: 1px solid #334155;
+}
+
+body.dark form button {
+  background: #2563eb;
+}
 
