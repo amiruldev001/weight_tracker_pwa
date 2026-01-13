@@ -1,3 +1,7 @@
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
+
 document.getElementById("progressForm").addEventListener("submit", e => {
   e.preventDefault();
 
