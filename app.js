@@ -222,6 +222,12 @@ function renderChart(labels, weights) {
 // ---------------------------
 // INITIALIZE
 // ---------------------------
-checkPin();
-loadRecords();
+// Wait for DB to be ready before doing anything with it
+window.dbReady.then(() => {
+  checkPin();       // PIN lock
+  loadRecords();    // load saved records
+}).catch(err => {
+  console.error("Failed to initialize DB:", err);
+});
+
 //window.dbReady.then(() => loadRecords());
