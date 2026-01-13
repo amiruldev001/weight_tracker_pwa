@@ -2,6 +2,16 @@
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js");
 }
+const pinOverlay = document.getElementById("pinOverlay");
+const pinInput = document.getElementById("pinInput");
+const pinBtn = document.getElementById("pinBtn");
+const pinMsg = document.getElementById("pinMsg");
+const lockBtn = document.getElementById("lockBtn");
+const resetBtn = document.getElementById("resetBtn");
+
+function hashPin(pin) {
+  return btoa(pin.split("").reverse().join(""));
+}
 
 // Cache DOM
 const form = document.getElementById("progressForm");
@@ -122,3 +132,59 @@ function renderChart(labels, weights) {
     }
   });
 }
+
+function checkPin() {
+  const savedPin = localStorage.getItem("pin");
+
+  if (!savedPin) {
+    pinMsg.textContent = "Set a new 4-digit PIN";
+    pinBtn.textContent = "Set PIN";
+  }
+
+  pinBtn.onclick = () => {
+    const entered = pinInput.value;
+
+    if (entered.length !== 4) {
+      pinMsg.textContent = "PIN must be 4 digits";
+      return;
+    }
+
+    if (!savedPin) {
+      localStorage.setItem("pin", hashPin(entered));
+      pinOverlay.style.display = "none";
+      return;
+    }
+
+    if (hashPin(entered) === savedPin) {
+      pinOverlay.style.display = "none";
+    } else {
+      pinMsg.textContent = "Wrong PIN";
+    }
+  };
+}
+
+resetBtn.addEventListener("click", () => {
+  if (!confirm("This will delete ALL progress data. Continue?")) return;
+
+  db.run("DELETE FROM progress");
+  saveDb();
+
+  recordList.innerHTML = "";
+  bmiBox.innerHTML = "";
+
+  if (weightChart) weightChart.destroy();
+
+  alert("All data cleared.");
+});
+
+
+lockBtn.addEventListener("click", () => {
+  pinInput.value = "";
+  pinMsg.textContent = "";
+  pinOverlay.style.display = "flex";
+});
+
+
+checkPin();
+
+
