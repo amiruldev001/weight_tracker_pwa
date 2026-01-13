@@ -1,0 +1,53 @@
+body {
+  font-family: system-ui, sans-serif;
+  background: #f4f7fb;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background: #1f3c88;
+  color: white;
+  text-align: center;
+  padding: 1.2rem;
+}
+
+main {
+  padding: 1rem;
+  max-width: 500px;
+  margin: auto;
+}
+
+form {
+  background: white;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0,0,0,.1);
+}
+
+input, textarea, button {
+  width: 100%;
+  margin-bottom: 0.7rem;
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+button {
+  background: #1f3c88;
+  color: white;
+  font-weight: bold;
+  border: none;
+}
+
+#records {
+  margin-top: 1.5rem;
+}
+
+li {
+  background: white;
+  padding: 0.8rem;
+  margin-bottom: 0.6rem;
+  border-radius: 10px;
+  box-shadow: 0 3px 8px rgba(0,0,0,.08);
+}
