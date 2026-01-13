@@ -11,6 +11,9 @@
   <header>
     <h1>🏋️ Fitness Tracker</h1>
     <p>Weekly Progress Monitor</p>
+    <button id="lockBtn">🔐</button>
+<button id="resetBtn">🗑️</button>
+
   </header>
 
   <main>
@@ -33,4 +36,13 @@
   <script src="db.js"></script>
   <script src="app.js"></script>
 </body>
+  <div id="pinOverlay">
+  <div class="pinBox">
+    <h2>🔒 Enter PIN</h2>
+    <input type="password" id="pinInput" maxlength="4" inputmode="numeric" />
+    <button id="pinBtn">Unlock</button>
+    <p id="pinMsg"></p>
+  </div>
+</div>
+
 </html>
