@@ -180,3 +180,58 @@ body.dark form button {
   background: #2563eb;
 }
 
+/* Bottom navigation */
+#bottomNav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background: #111827;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 1000;
+}
+
+#bottomNav button {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+#bottomNav button.active {
+  color: #60a5fa;
+  font-weight: bold;
+}
+
+/* Page spacing so content is not hidden */
+.page {
+  padding-bottom: 80px;
+}
+
+/* Modal fix */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.modal.active {
+  display: flex;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 420px;
+}
+
+
