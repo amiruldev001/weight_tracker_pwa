@@ -1,7 +1,15 @@
+// ===========================
+// APP.JS - FULL INTEGRATED
+// ===========================
+
 // Register Service Worker
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js");
 }
+
+// ---------------------------
+// DOM ELEMENTS
+// ---------------------------
 const pinOverlay = document.getElementById("pinOverlay");
 const pinInput = document.getElementById("pinInput");
 const pinBtn = document.getElementById("pinBtn");
@@ -9,24 +17,40 @@ const pinMsg = document.getElementById("pinMsg");
 const lockBtn = document.getElementById("lockBtn");
 const resetBtn = document.getElementById("resetBtn");
 
-function hashPin(pin) {
-  return btoa(pin.split("").reverse().join(""));
-}
-
-// Cache DOM
 const form = document.getElementById("progressForm");
 const recordList = document.getElementById("recordList");
 const bmiBox = document.getElementById("bmiBox");
 const themeToggle = document.getElementById("themeToggle");
+const chartCanvas = document.getElementById("weightChart");
 
 let weightChart;
 
-// Dark mode restore
+// ---------------------------
+// UTILITIES
+// ---------------------------
+function hashPin(pin) {
+  return btoa(pin.split("").reverse().join(""));
+}
+
+function calculateBMI(weight, height) {
+  if (!height) return null;
+  return (weight / (height * height)).toFixed(1);
+}
+
+function getTrendArrow(current, previous) {
+  if (!previous) return "➖";
+  if (current < previous) return "⬇️";
+  if (current > previous) return "⬆️";
+  return "➖";
+}
+
+// ---------------------------
+// DARK MODE
+// ---------------------------
 if (localStorage.getItem("theme") === "dark") {
   document.body.classList.add("dark");
 }
 
-// Theme toggle
 themeToggle.addEventListener("click", () => {
   document.body.classList.toggle("dark");
   localStorage.setItem(
@@ -35,7 +59,77 @@ themeToggle.addEventListener("click", () => {
   );
 });
 
-// Form submit
+// ---------------------------
+// PIN LOCK
+// ---------------------------
+function checkPin() {
+  pinOverlay.style.display = "flex";
+
+  // Update overlay text
+  const savedPin = localStorage.getItem("pin");
+  if (!savedPin) {
+    pinMsg.textContent = "Set a new 4-digit PIN";
+    pinBtn.textContent = "Set PIN";
+  } else {
+    pinMsg.textContent = "Enter your PIN";
+    pinBtn.textContent = "Unlock";
+  }
+
+  pinBtn.onclick = () => {
+    const entered = pinInput.value;
+
+    if (entered.length !== 4) {
+      pinMsg.textContent = "PIN must be 4 digits";
+      return;
+    }
+
+    let savedPin = localStorage.getItem("pin"); // read fresh
+
+    // No PIN yet → set
+    if (!savedPin) {
+      localStorage.setItem("pin", hashPin(entered));
+      pinOverlay.style.display = "none";
+      pinInput.value = "";
+      return;
+    }
+
+    // Check existing PIN
+    if (hashPin(entered) === savedPin) {
+      pinOverlay.style.display = "none";
+      pinInput.value = "";
+    } else {
+      pinMsg.textContent = "Wrong PIN";
+    }
+  };
+}
+
+// Manual lock button
+lockBtn.addEventListener("click", () => {
+  pinInput.value = "";
+  pinMsg.textContent = "";
+  pinOverlay.style.display = "flex";
+});
+
+// ---------------------------
+// RESET / CLEAR DATA
+// ---------------------------
+resetBtn.addEventListener("click", () => {
+  if (!confirm("This will delete ALL progress data. Continue?")) return;
+
+  db.run("DELETE FROM progress");
+  saveDb();
+
+  recordList.innerHTML = "";
+  bmiBox.innerHTML = "";
+
+  if (weightChart) weightChart.destroy();
+
+  alert("All data cleared.");
+});
+
+// ---------------------------
+// FORM SUBMIT
+// ---------------------------
 form.addEventListener("submit", function (e) {
   e.preventDefault();
 
@@ -44,7 +138,6 @@ form.addEventListener("submit", function (e) {
     return;
   }
 
-  // SAFE input reads
   const dateVal = document.getElementById("date").value;
   const weightVal = document.getElementById("weight").value;
   const fatVal = document.getElementById("fat").value || null;
@@ -65,7 +158,9 @@ form.addEventListener("submit", function (e) {
   form.reset();
 });
 
-// Load records
+// ---------------------------
+// LOAD RECORDS + BMI + TREND
+// ---------------------------
 function loadRecords() {
   recordList.innerHTML = "";
 
@@ -90,11 +185,8 @@ function loadRecords() {
   const height = localStorage.getItem("height");
 
   if (height && latest) {
-    const bmi = (latest[2] / (height * height)).toFixed(1);
-    const arrow =
-      !previous ? "➖" :
-      latest[2] < previous[2] ? "⬇️" :
-      latest[2] > previous[2] ? "⬆️" : "➖";
+    const bmi = calculateBMI(latest[2], height);
+    const arrow = getTrendArrow(latest[2], previous?.[2]);
 
     bmiBox.innerHTML = `<strong>BMI:</strong> ${bmi} ${arrow}`;
   }
@@ -112,79 +204,38 @@ function loadRecords() {
   });
 }
 
-// Chart
+// ---------------------------
+// CHART.JS WEIGHT TREND
+// ---------------------------
 function renderChart(labels, weights) {
-  const ctx = document.getElementById("weightChart").getContext("2d");
+  const ctx = chartCanvas.getContext("2d");
   if (weightChart) weightChart.destroy();
 
   weightChart = new Chart(ctx, {
     type: "line",
     data: {
       labels,
-      datasets: [{
-        data: weights,
-        borderWidth: 3,
-        tension: 0.3
-      }]
+      datasets: [
+        {
+          label: "Weight (kg)",
+          data: weights,
+          borderWidth: 3,
+          borderColor: "#60a5fa",
+          backgroundColor: "rgba(96, 165, 250, 0.2)",
+          tension: 0.3,
+          fill: true
+        }
+      ]
     },
     options: {
+      responsive: true,
       plugins: { legend: { display: false } }
     }
   });
 }
 
-function checkPin() {
-  const savedPin = localStorage.getItem("pin");
-
-  if (!savedPin) {
-    pinMsg.textContent = "Set a new 4-digit PIN";
-    pinBtn.textContent = "Set PIN";
-  }
-
-  pinBtn.onclick = () => {
-    const entered = pinInput.value;
-
-    if (entered.length !== 4) {
-      pinMsg.textContent = "PIN must be 4 digits";
-      return;
-    }
-
-    if (!savedPin) {
-      localStorage.setItem("pin", hashPin(entered));
-      pinOverlay.style.display = "none";
-      return;
-    }
-
-    if (hashPin(entered) === savedPin) {
-      pinOverlay.style.display = "none";
-    } else {
-      pinMsg.textContent = "Wrong PIN";
-    }
-  };
-}
-
-resetBtn.addEventListener("click", () => {
-  if (!confirm("This will delete ALL progress data. Continue?")) return;
-
-  db.run("DELETE FROM progress");
-  saveDb();
-
-  recordList.innerHTML = "";
-  bmiBox.innerHTML = "";
-
-  if (weightChart) weightChart.destroy();
-
-  alert("All data cleared.");
-});
-
-
-lockBtn.addEventListener("click", () => {
-  pinInput.value = "";
-  pinMsg.textContent = "";
-  pinOverlay.style.display = "flex";
-});
-
-
-checkPin();
-
-
+// ---------------------------
+// INITIALIZE
+// ---------------------------
+checkPin(); // show PIN overlay on load
+loadRecords(); // load any existing records
