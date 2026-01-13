@@ -1,5 +1,5 @@
 // ===========================
-// APP.JS - FULL INTEGRATED WITH DB READY
+// APP.JS - FULL INTEGRATED WITH DB READY (FIXED)
 // ===========================
 
 // Register Service Worker
@@ -81,7 +81,7 @@ function checkPin() {
       return;
     }
 
-    let savedPin = localStorage.getItem("pin"); // read fresh
+    const savedPin = localStorage.getItem("pin");
 
     if (!savedPin) {
       localStorage.setItem("pin", hashPin(entered));
@@ -109,7 +109,7 @@ lockBtn.addEventListener("click", () => {
 // RESET / CLEAR DATA
 // ---------------------------
 resetBtn.addEventListener("click", async () => {
-  await window.dbReady; // wait for DB
+  await window.dbReady;
   if (!confirm("This will delete ALL progress data. Continue?")) return;
 
   db.run("DELETE FROM progress");
@@ -125,9 +125,9 @@ resetBtn.addEventListener("click", async () => {
 // ---------------------------
 // FORM SUBMIT
 // ---------------------------
-form.addEventListener("submit", async function (e) {
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  await window.dbReady; // wait for DB
+  await window.dbReady;
 
   const dateVal = document.getElementById("date").value;
   const weightVal = document.getElementById("weight").value;
@@ -179,15 +179,18 @@ async function loadRecords() {
     bmiBox.innerHTML = `<strong>BMI:</strong> ${bmi} ${arrow}`;
   }
 
-  // Display records latest first
+  // Display records (latest first)
   res[0].values.slice().reverse().forEach(row => {
     const li = document.createElement("li");
+    li.dataset.id = row[0]; // IMPORTANT
+
     li.innerHTML = `
       <strong>${row[1]}</strong><br>
       Weight: ${row[2]} kg<br>
       Fat: ${row[3] ?? "-"}% | Water: ${row[4] ?? "-"}%<br>
       <em>${row[5]}</em>
     `;
+
     recordList.appendChild(li);
   });
 }
@@ -215,22 +218,22 @@ function renderChart(labels, weights) {
         }
       ]
     },
-    options: { responsive: true, plugins: { legend: { display: false } } }
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } }
+    }
   });
 }
 
 // ---------------------------
 // INITIALIZE
 // ---------------------------
-// Wait for DB to be ready before doing anything with it
-window.dbReady.then(() => {
-  checkPin();       // PIN lock
-  loadRecords();    // load saved records
-}).catch(err => {
-  console.error("Failed to initialize DB:", err);
-});
-
-//window.dbReady.then(() => loadRecords());
+window.dbReady
+  .then(() => {
+    checkPin();
+    loadRecords();
+  })
+  .catch(err => console.error("Failed to initialize DB:", err));
 
 // ---------------------------
 // PAGE NAVIGATION
@@ -263,14 +266,18 @@ const closeModalBtn = document.getElementById("closeModalBtn");
 
 let currentEditId = null;
 
-recordList.addEventListener("click", (e) => {
+recordList.addEventListener("click", async (e) => {
   const li = e.target.closest("li");
-  if (!li) return;
-  const id = li.dataset.id;
-  currentEditId = id;
+  if (!li || !li.dataset.id) return;
 
-  // Fetch record from DB
-  const res = db.exec(`SELECT * FROM progress WHERE id = ?`, [id]);
+  await window.dbReady;
+  currentEditId = li.dataset.id;
+
+  const res = db.exec(
+    `SELECT * FROM progress WHERE id = ?`,
+    [currentEditId]
+  );
+
   if (!res.length) return;
 
   const row = res[0].values[0];
@@ -288,15 +295,25 @@ closeModalBtn.addEventListener("click", () => {
 });
 
 // Save edited record
-saveEditBtn.addEventListener("click", () => {
+saveEditBtn.addEventListener("click", async () => {
   if (!currentEditId) return;
+  await window.dbReady;
 
   db.run(
-    `UPDATE progress SET date=?, weight=?, fat=?, water=?, notes=? WHERE id=?`,
-    [editDate.value, editWeight.value, editFat.value, editWater.value, editNotes.value, currentEditId]
+    `UPDATE progress
+     SET date=?, weight=?, fat=?, water=?, notes=?
+     WHERE id=?`,
+    [
+      editDate.value,
+      editWeight.value,
+      editFat.value,
+      editWater.value,
+      editNotes.value,
+      currentEditId
+    ]
   );
+
   saveDb();
   editModal.classList.remove("active");
   loadRecords();
 });
-
